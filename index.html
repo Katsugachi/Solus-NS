@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solus NS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #1e283a;
+            --bg-medium: #28384d;
+            --text-light: #e0e6ed;
+            --accent-blue: #007bff;
+            --accent-hover: #0060c0;
+            --border-color: #384e68;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-light);
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        .container {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        /* Top Bar */
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 40px;
+            background: var(--bg-medium);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .top-bar-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .time {
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+            color: var(--text-light);
+        }
+
+        /* Main Content Area */
+        .main-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 40px 40px 20px 40px;
+            position: relative;
+        }
+
+        .section-label {
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: rgba(224, 230, 237, 0.6);
+            margin-bottom: 20px;
+        }
+
+        /* Game Carousel */
+        .carousel-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: visible;
+            padding: 60px 0;
+        }
+
+        .carousel-wrapper {
+            width: 100%;
+            overflow: visible;
+            position: relative;
+        }
+
+        .carousel-track {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            will-change: transform;
+        }
+
+        .game-card {
+            min-width: 300px;
+            width: 300px;
+            height: 400px;
+            border-radius: 18px;
+            background: var(--bg-medium);
+            position: relative;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+            border: 4px solid var(--border-color);
+            flex-shrink: 0;
+        }
+
+        .game-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.7) 100%);
+            z-index: 1;
+        }
+
+        .game-card.selected {
+            transform: scale(1.2);
+            border-color: var(--accent-blue);
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.9), 
+                        0 0 0 8px rgba(0, 123, 255, 0.4);
+            z-index: 10;
+        }
+
+        .game-card:not(.selected) {
+            transform: scale(0.85);
+            opacity: 0.4;
+        }
+
+        .game-card:hover:not(.selected) {
+            opacity: 0.6;
+            border-color: var(--accent-hover);
+        }
+
+        .game-cover {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            position: relative;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+        }
+
+        .game-title {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 20px;
+            font-size: 18px;
+            font-weight: 700;
+            z-index: 2;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+        }
+
+        /* Bottom Info */
+        .bottom-info {
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--bg-medium);
+            border-top: 1px solid var(--border-color);
+        }
+
+        .game-details {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .selected-game-title {
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            color: var(--text-light);
+        }
+
+        .game-meta {
+            font-size: 13px;
+            color: rgba(224, 230, 237, 0.5);
+            font-weight: 500;
+        }
+
+        .controls-hint {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .control-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 13px;
+            color: rgba(224, 230, 237, 0.6);
+        }
+
+        .control-key {
+            background: var(--bg-dark);
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 12px;
+            border: 1px solid var(--border-color);
+            min-width: 30px;
+            text-align: center;
+            color: var(--text-light);
+        }
+
+        /* Navigation Arrows */
+        .nav-arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 50px;
+            height: 50px;
+            background: var(--bg-medium);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            z-index: 20;
+            border: 1px solid var(--border-color);
+        }
+
+        .nav-arrow:hover {
+            background: var(--accent-blue);
+            border-color: var(--accent-blue);
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .nav-arrow.left {
+            left: 20px;
+        }
+
+        .nav-arrow.right {
+            right: 20px;
+        }
+
+        .arrow-icon {
+            width: 24px;
+            height: 24px;
+            fill: var(--text-light);
+        }
+        .game-card:nth-child(5n+1) .game-cover { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .game-card:nth-child(5n+2) .game-cover { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+        .game-card:nth-child(5n+3) .game-cover { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+        .game-card:nth-child(5n+4) .game-cover { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+        .game-card:nth-child(5n+5) .game-cover { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="top-bar">
+            <div class="top-bar-left">
+                <div class="time" id="currentTime">12:00 PM</div>
+            </div>
+        </div>
+
+        <div class="main-area">
+            <div class="section-label">All Software</div>
+            
+            <div class="carousel-container">
+                <div class="nav-arrow left" id="navLeft">
+                    <svg class="arrow-icon" viewBox="0 0 24 24">
+                        <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
+                    </svg>
+                </div>
+                
+                <div class="carousel-wrapper">
+                    <div class="carousel-track" id="carouselTrack">
+                    </div>
+                </div>
+
+                <div class="nav-arrow right" id="navRight">
+                    <svg class="arrow-icon" viewBox="0 0 24 24">
+                        <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/>
+                    </svg>
+                </div>
+            </div>
+        </div>
+        <div class="bottom-info">
+            <div class="game-details">
+                <div class="selected-game-title" id="selectedTitle">Select a game</div>
+                <div class="game-meta">Press Enter or click to start</div>
+            </div>
+            <div class="controls-hint">
+                <div class="control-item">
+                    <span class="control-key">← →</span>
+                    <span>Navigate</span>
+                </div>
+                <div class="control-item">
+                    <span class="control-key">Enter</span>
+                    <span>Start</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const games = [
+            { name: "Hollow Knight", cover: "hk.jpg", url: "hk.html", abbr: "HK" },
+            { name: "Racing Thunder", cover: "placeholder.jpg", url: "game2.html", abbr: "RT" },
+            { name: "Space Explorer", cover: "placeholder.jpg", url: "game3.html", abbr: "SE" },
+            { name: "Puzzle Master", cover: "placeholder.jpg", url: "game4.html", abbr: "PM" },
+            { name: "Dragon's Legacy", cover: "placeholder.jpg", url: "game5.html", abbr: "DL" }
+        ];
+
+        let selectedIndex = 0;
+        const carouselTrack = document.getElementById('carouselTrack');
+        const selectedTitle = document.getElementById('selectedTitle');
+        const navLeft = document.getElementById('navLeft');
+        const navRight = document.getElementById('navRight');
+        function updateTime() {
+            const now = new Date();
+            const hours = now.getHours();
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            const displayHours = hours % 12 || 12;
+            document.getElementById('currentTime').textContent = `${displayHours}:${minutes} ${ampm}`;
+        }
+        updateTime();
+        setInterval(updateTime, 60000);
+        function init() {
+            games.forEach((game, index) => {
+                const card = document.createElement('div');
+                card.className = 'game-card';
+                card.innerHTML = `
+                    <div class="game-cover">
+                        ${game.abbr}
+                    </div>
+                    <div class="game-title">${game.name}</div>
+                `;
+                card.addEventListener('click', () => {
+                    selectGame(index);
+                    setTimeout(() => launchGame(), 300);
+                });
+                carouselTrack.appendChild(card);
+            });
+            selectGame(0);
+        }
+        function updateCarousel() {
+            const cards = document.querySelectorAll('.game-card');
+                cards.forEach((card, index) => {
+                card.classList.remove('selected');
+                if (index === selectedIndex) {
+                    card.classList.add('selected');
+                }
+            });
+            const cardWidth = 300;
+            const gap = 30;
+            const viewportCenter = window.innerWidth / 2;
+            const cardCenter = cardWidth / 2;
+            const translateX = viewportCenter - cardCenter - (selectedIndex * (cardWidth + gap));
+            carouselTrack.style.transform = `translateX(${translateX}px)`;
+            selectedTitle.textContent = games[selectedIndex].name;
+        }
+        function selectGame(newIndex) {
+            if (newIndex < 0) {
+                selectedIndex = games.length - 1;
+            } else if (newIndex >= games.length) {
+                selectedIndex = 0;
+            } else {
+                selectedIndex = newIndex;
+            }
+            updateCarousel();
+        }
+        function launchGame() {
+            const game = games[selectedIndex];
+            window.location.href = game.url;
+        }
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                selectGame(selectedIndex - 1);
+            } else if (e.key === 'ArrowRight') {
+                e.preventDefault();
+                selectGame(selectedIndex + 1);
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                launchGame();
+            }
+        });
+        navLeft.addEventListener('click', () => selectGame(selectedIndex - 1));
+        navRight.addEventListener('click', () => selectGame(selectedIndex + 1));
+        init();
+    </script>
+</body>
+</html>
