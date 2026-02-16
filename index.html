@@ -152,6 +152,7 @@
             font-weight: 800;
             background-size: cover;
             background-position: center;
+            background-repeat: no-repeat;
             position: relative;
             text-transform: uppercase;
             letter-spacing: 4px;
@@ -159,6 +160,10 @@
 
         .game-cover.no-image {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .game-cover.has-image {
+            font-size: 0;
         }
 
         .game-title {
@@ -330,8 +335,8 @@
     <script>
         // Game Library
         const games = [
-            { name: "hk.html", cover: "hk.jpg", url: "hk.html" },
-            { name: "Racing Thunder", cover: "game2.jpg", url: "game2.html" },
+            { name: "Hollow Knight", cover: "hk.jpg", url: "hk.html" },
+            { name: "Super Mario", cover: "sm.jpg", url: "sm.html" },
             { name: "Space Explorer", cover: "game3.jpg", url: "game3.html" },
             { name: "Puzzle Master", cover: "game4.jpg", url: "game4.html" },
             { name: "Dragon's Legacy", cover: "game5.jpg", url: "game5.html" },
@@ -375,6 +380,8 @@
                 img.onload = () => {
                     coverDiv.style.backgroundImage = `url('${game.cover}')`;
                     coverDiv.classList.remove('no-image');
+                    coverDiv.classList.add('has-image');
+                    coverDiv.textContent = ''; // Remove any text when image loads
                 };
                 img.onerror = () => {
                     // Keep gradient background with game name
