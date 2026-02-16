@@ -150,10 +150,15 @@
             justify-content: center;
             font-size: 32px;
             font-weight: 800;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background-size: cover;
+            background-position: center;
             position: relative;
             text-transform: uppercase;
             letter-spacing: 4px;
+        }
+
+        .game-cover.no-image {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
 
         .game-title {
@@ -260,6 +265,8 @@
             height: 24px;
             fill: var(--text-light);
         }
+
+        /* Game variations */
         .game-card:nth-child(5n+1) .game-cover { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
         .game-card:nth-child(5n+2) .game-cover { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
         .game-card:nth-child(5n+3) .game-cover { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
@@ -269,12 +276,14 @@
 </head>
 <body>
     <div class="container">
+        <!-- Top Bar -->
         <div class="top-bar">
             <div class="top-bar-left">
                 <div class="time" id="currentTime">12:00 PM</div>
             </div>
         </div>
 
+        <!-- Main Content -->
         <div class="main-area">
             <div class="section-label">All Software</div>
             
@@ -287,6 +296,7 @@
                 
                 <div class="carousel-wrapper">
                     <div class="carousel-track" id="carouselTrack">
+                        <!-- Games will be inserted here -->
                     </div>
                 </div>
 
@@ -297,6 +307,8 @@
                 </div>
             </div>
         </div>
+
+        <!-- Bottom Info -->
         <div class="bottom-info">
             <div class="game-details">
                 <div class="selected-game-title" id="selectedTitle">Select a game</div>
@@ -316,12 +328,18 @@
     </div>
 
     <script>
+        // Game Library
         const games = [
-            { name: "Hollow Knight", cover: "hk.jpg", url: "hk.html", abbr: "HK" },
-            { name: "Racing Thunder", cover: "placeholder.jpg", url: "game2.html", abbr: "RT" },
-            { name: "Space Explorer", cover: "placeholder.jpg", url: "game3.html", abbr: "SE" },
-            { name: "Puzzle Master", cover: "placeholder.jpg", url: "game4.html", abbr: "PM" },
-            { name: "Dragon's Legacy", cover: "placeholder.jpg", url: "game5.html", abbr: "DL" }
+            { name: "Super Adventure Quest", cover: "game1.jpg", url: "game1.html" },
+            { name: "Racing Thunder", cover: "game2.jpg", url: "game2.html" },
+            { name: "Space Explorer", cover: "game3.jpg", url: "game3.html" },
+            { name: "Puzzle Master", cover: "game4.jpg", url: "game4.html" },
+            { name: "Dragon's Legacy", cover: "game5.jpg", url: "game5.html" },
+            { name: "Ocean Odyssey", cover: "game6.jpg", url: "game6.html" },
+            { name: "Ninja Warriors", cover: "game7.jpg", url: "game7.html" },
+            { name: "Magic Kingdom", cover: "game8.jpg", url: "game8.html" },
+            { name: "Robot Rebellion", cover: "game9.jpg", url: "game9.html" },
+            { name: "Jungle Safari", cover: "game10.jpg", url: "game10.html" }
         ];
 
         let selectedIndex = 0;
@@ -329,6 +347,8 @@
         const selectedTitle = document.getElementById('selectedTitle');
         const navLeft = document.getElementById('navLeft');
         const navRight = document.getElementById('navRight');
+
+        // Update time
         function updateTime() {
             const now = new Date();
             const hours = now.getHours();
@@ -339,16 +359,36 @@
         }
         updateTime();
         setInterval(updateTime, 60000);
+
+        // Initialize games
         function init() {
             games.forEach((game, index) => {
                 const card = document.createElement('div');
                 card.className = 'game-card';
-                card.innerHTML = `
-                    <div class="game-cover">
-                        ${game.abbr}
-                    </div>
-                    <div class="game-title">${game.name}</div>
-                `;
+                
+                // Try to load image, fallback to gradient if it fails
+                const coverDiv = document.createElement('div');
+                coverDiv.className = 'game-cover no-image';
+                
+                // Attempt to load the image
+                const img = new Image();
+                img.onload = () => {
+                    coverDiv.style.backgroundImage = `url('${game.cover}')`;
+                    coverDiv.classList.remove('no-image');
+                };
+                img.onerror = () => {
+                    // Keep gradient background with game name
+                    coverDiv.textContent = game.name;
+                };
+                img.src = game.cover;
+                
+                const titleDiv = document.createElement('div');
+                titleDiv.className = 'game-title';
+                titleDiv.textContent = game.name;
+                
+                card.appendChild(coverDiv);
+                card.appendChild(titleDiv);
+                
                 card.addEventListener('click', () => {
                     selectGame(index);
                     setTimeout(() => launchGame(), 300);
@@ -357,23 +397,37 @@
             });
             selectGame(0);
         }
+
+        // Update carousel position and selection
         function updateCarousel() {
             const cards = document.querySelectorAll('.game-card');
-                cards.forEach((card, index) => {
+            
+            // Update selected class
+            cards.forEach((card, index) => {
                 card.classList.remove('selected');
                 if (index === selectedIndex) {
                     card.classList.add('selected');
                 }
             });
+
+            // Calculate proper centering
             const cardWidth = 300;
             const gap = 30;
             const viewportCenter = window.innerWidth / 2;
             const cardCenter = cardWidth / 2;
+            
+            // Position = viewport center - card center - (index * card+gap distance)
             const translateX = viewportCenter - cardCenter - (selectedIndex * (cardWidth + gap));
+            
             carouselTrack.style.transform = `translateX(${translateX}px)`;
+
+            // Update bottom info
             selectedTitle.textContent = games[selectedIndex].name;
         }
+
+        // Navigate carousel with cycling
         function selectGame(newIndex) {
+            // Wrap around
             if (newIndex < 0) {
                 selectedIndex = games.length - 1;
             } else if (newIndex >= games.length) {
@@ -383,24 +437,43 @@
             }
             updateCarousel();
         }
+
+        // Launch game
         function launchGame() {
             const game = games[selectedIndex];
             window.location.href = game.url;
         }
+
+        // Keyboard controls
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'ArrowLeft') {
+            console.log('Key pressed:', e.key, e.code);
+            
+            if (e.key === 'ArrowLeft' || e.code === 'ArrowLeft') {
                 e.preventDefault();
+                e.stopPropagation();
                 selectGame(selectedIndex - 1);
-            } else if (e.key === 'ArrowRight') {
+            } else if (e.key === 'ArrowRight' || e.code === 'ArrowRight') {
                 e.preventDefault();
+                e.stopPropagation();
                 selectGame(selectedIndex + 1);
-            } else if (e.key === 'Enter') {
+            } else if (e.key === 'Enter' || e.code === 'Enter') {
                 e.preventDefault();
+                e.stopPropagation();
                 launchGame();
             }
+        }, true);
+
+        // Arrow button controls
+        navLeft.addEventListener('click', (e) => {
+            e.preventDefault();
+            selectGame(selectedIndex - 1);
         });
-        navLeft.addEventListener('click', () => selectGame(selectedIndex - 1));
-        navRight.addEventListener('click', () => selectGame(selectedIndex + 1));
+        navRight.addEventListener('click', (e) => {
+            e.preventDefault();
+            selectGame(selectedIndex + 1);
+        });
+
+        // Initialize
         init();
     </script>
 </body>
